@@ -12,10 +12,18 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid request body." }, { status: 400 });
   }
   const { email, password } = body;
-  const emailValue = email?.trim().toLowerCase();
-  const expectedEmail = process.env.ADMIN_EMAIL?.trim().toLowerCase();
-  const storedHash = process.env.ADMIN_PASSWORD_HASH?.trim();
-  if (!expectedEmail || !storedHash || emailValue !== expectedEmail || !password || !verifyAdminPassword(password, storedHash)) {
+  const emailValue = email?.trim().replace(/^['"]|['"]$/g, "").toLowerCase();
+  const expectedEmail = process.env.ADMIN_EMAIL?.trim().replace(/^['"]|['"]$/g, "").toLowerCase();
+  const storedHash = process.env.ADMIN_PASSWORD_HASH?.trim().replace(/^['"]|['"]$/g, "");
+  const rejectionReason = !expectedEmail || !storedHash
+    ? "missing-environment"
+    : emailValue !== expectedEmail
+      ? "email-mismatch"
+      : !password || !verifyAdminPassword(password, storedHash)
+        ? "password-mismatch"
+        : null;
+  if (rejectionReason) {
+    console.warn("[admin-login] rejected", { reason: rejectionReason, hasEmail: Boolean(expectedEmail), hasPasswordHash: Boolean(storedHash), sessionSecretLength: process.env.ADMIN_SESSION_SECRET?.trim().length ?? 0 });
     return NextResponse.json({ error: "Invalid admin credentials." }, { status: 401 });
   }
 
