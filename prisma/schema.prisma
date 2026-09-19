@@ -1,0 +1,106 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Profile {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name      String
+  role      String
+  bio       String   @default("")
+  email     String
+  location  String   @default("")
+  imageUrl  String   @default("") @map("image_url")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+  @@map("profiles")
+}
+
+model Project {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  slug        String   @unique
+  title       String
+  category    String
+  metric      String   @default("")
+  description String   @default("")
+  media       String   @default("product")
+  status      String   @default("Draft")
+  featured    Boolean  @default(false)
+  sortOrder   Int      @default(0) @map("sort_order")
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at")
+  createdAt   DateTime @default(now()) @map("created_at")
+  @@index([status, featured, sortOrder])
+  @@map("projects")
+}
+
+model Service {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title       String
+  description String   @default("")
+  visible     Boolean  @default(true)
+  sortOrder   Int      @default(0) @map("sort_order")
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at")
+  @@map("services")
+}
+
+model Inquiry {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name      String
+  company   String   @default("")
+  email     String
+  subject   String   @default("")
+  message   String
+  status    String   @default("New")
+  createdAt DateTime @default(now()) @map("created_at")
+  @@index([status, createdAt])
+  @@map("inquiries")
+}
+
+model SiteSettings {
+  id               Boolean  @id @default(true)
+  siteTitle        String   @map("site_title")
+  siteDescription  String   @map("site_description")
+  contactEmail     String   @map("contact_email")
+  maintenanceMode  Boolean  @default(false) @map("maintenance_mode")
+  analyticsEnabled Boolean  @default(true) @map("analytics_enabled")
+  contactTitle String @default("Let's talk about your brand.") @map("contact_title")
+  contactIntro String @default("Tell me where you are and where you want to be. I usually reply within 24 hours.") @map("contact_intro")
+  contactResponseTime String @default("Usually within 24 hours") @map("contact_response_time")
+  contactLocation String @default("Dubai - Working Worldwide") @map("contact_location")
+  aboutIntro String @default("I help modern brands grow through strategy, design, and e-commerce execution.") @map("about_intro")
+  aboutDetail String @default("The best work sits at the intersection of a sharp point of view and a commercial outcome.") @map("about_detail")
+  aboutProof String @default("From first sketch to post-launch optimization, I stay close to the details that make a brand feel considered and perform.") @map("about_proof")
+  servicesIntro String @default("Engagements are shaped around your goals. Below is the full range of ways I plug into a brand.") @map("services_intro")
+  portfolioIntro String @default("A selection of brands scaled through strategy, design and e-commerce.") @map("portfolio_intro")
+  caseStudiesIntro String @default("A closer look at the strategy, execution and outcomes behind selected engagements.") @map("case_studies_intro")
+  experienceIntro String @default("Seven years of experience scaling D2C brands across agencies, studios and direct founder partnerships.") @map("experience_intro")
+  updatedAt        DateTime @default(now()) @updatedAt @map("updated_at")
+  @@map("site_settings")
+}
+
+model AnalyticsEvent {
+  id        BigInt   @id @default(autoincrement())
+  eventName String   @map("event_name")
+  path      String
+  referrer  String?
+  userAgent String?  @map("user_agent")
+  ipHash    String?  @map("ip_hash")
+  createdAt DateTime @default(now()) @map("created_at")
+  @@index([createdAt])
+  @@index([path, createdAt])
+  @@map("analytics_events")
+}
+
+model Resume {
+  id        Boolean  @id @default(true)
+  fileName  String   @map("file_name")
+  mimeType  String   @default("application/pdf") @map("mime_type")
+  fileSize  Int      @map("file_size")
+  fileData  Bytes    @map("file_data")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@map("resumes")
+}

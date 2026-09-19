@@ -1,0 +1,105 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* Two-column row */
+.row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+.field,
+.fieldFull {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.field label,
+.fieldFull label {
+  font-size: 0.88rem;
+  color: var(--foreground);
+  letter-spacing: 0.02em;
+}
+
+.field input,
+.field textarea,
+.fieldFull input,
+.fieldFull textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--border-strong);
+  background: rgba(255, 255, 255, 0.55);
+  color: var(--foreground);
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 180ms ease, box-shadow 180ms ease;
+  border-radius: 0;
+  resize: vertical;
+}
+
+.field input:focus,
+.field textarea:focus,
+.fieldFull input:focus,
+.fieldFull textarea:focus {
+  border-color: rgba(25, 21, 17, 0.35);
+  box-shadow: 0 0 0 3px rgba(236, 143, 58, 0.12);
+}
+
+.field input::placeholder,
+.field textarea::placeholder,
+.fieldFull input::placeholder,
+.fieldFull textarea::placeholder {
+  color: rgba(109, 98, 87, 0.5);
+}
+
+.fieldFull textarea {
+  min-height: 180px;
+  line-height: 1.65;
+}
+
+/* Feedback */
+.feedback {
+  font-size: 0.9rem;
+  color: var(--accent);
+  padding: 10px 0;
+}
+
+.feedbackError {
+  color: #c0392b;
+}
+
+/* Submit button */
+.submit {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 24px;
+  border: none;
+  border-radius: 999px;
+  background: var(--foreground);
+  color: var(--surface);
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: opacity 180ms ease, transform 180ms ease;
+}
+
+.submit:hover:not(:disabled) {
+  opacity: 0.82;
+  transform: translateY(-1px);
+}
+
+.submit:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+@media (max-width: 640px) {
+  .row {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,66 +1,215 @@
-import Image from "next/image";
+import Link from "next/link";
 import styles from "./page.module.css";
+import { siteContent } from "@/content/site-content";
 
 export default function Home() {
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    name: "Mehroz",
+    jobTitle: "E-commerce Strategy & Creative Direction",
+    description:
+      "Portfolio website for an e-commerce strategist, Shopify consultant, and creative director.",
+    areaServed: "Worldwide",
+  };
+
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className={styles.intro}>
-          <h1>To get started, edit the page.tsx file.</h1>
+    <main className={styles.page} id="top">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
+
+      <header className={styles.header}>
+        <Link className={styles.brand} href="/" aria-label="Mehroz home">
+          mehroz.
+        </Link>
+
+        <nav className={styles.nav} aria-label="Primary">
+          <Link href="/">Home</Link>
+          <Link href="/about">About</Link>
+          <Link href="/services">Services</Link>
+          <Link href="/portfolio">Portfolio</Link>
+          <Link href="/experience">Experience</Link>
+          <Link href="/contact">Contact</Link>
+        </nav>
+
+        <Link className={styles.navButton} href="/contact">
+          Let&apos;s talk ↗
+        </Link>
+      </header>
+
+      <section className={styles.hero} id="home">
+        <div className={styles.heroCopy}>
+          <p className={styles.kicker}>
+            <span className={styles.kickerDot} /> E-COMMERCE EXPERT & CREATIVE
+            STRATEGIST
+          </p>
+
+          <h1>
+            Helping Brands Scale Through Strategy, Design <em>&amp; E-Commerce.</em>
+          </h1>
+
+          <p className={styles.lead}>
+            I partner with founders to build premium D2C brands - combining sharp
+            strategy, editorial creative, and revenue-focused e-commerce execution.
+          </p>
+
+          <div className={styles.actions}>
+            <Link className={styles.primaryAction} href="/contact">
+              Start a project ↗
+            </Link>
+            <Link className={styles.secondaryAction} href="/portfolio">
+              View work
+            </Link>
+          </div>
+        </div>
+
+        <div className={styles.heroVisual} aria-hidden="true">
+          <div className={styles.heroMonogram}>D</div>
+          <div className={styles.portraitFrame}>
+            <div className={styles.portraitBackdrop} />
+            <div className={styles.portraitHair} />
+            <div className={styles.portraitFace} />
+            <div className={styles.portraitNeck} />
+            <div className={styles.portraitJacket} />
+            <div className={styles.portraitShirt} />
+            <div className={styles.portraitShadow} />
+          </div>
+          <div className={styles.heroBadge}>BASED IN DUBAI — WORLDWIDE</div>
+        </div>
+      </section>
+
+      <section className={styles.ticker} aria-label="Selected clients">
+        <div className={styles.tickerTrack}>
+          {[...siteContent.brandLogos, ...siteContent.brandLogos].map((brand, index) => (
+            <span key={`${brand}-${index}`}>{brand}</span>
+          ))}
+        </div>
+      </section>
+
+      <section className={styles.stats} aria-label="Key metrics">
+        {siteContent.metrics.map((metric) => (
+          <article key={metric.label} className={styles.statCard}>
+            <strong>{metric.value}</strong>
+            <span>{metric.label}</span>
+          </article>
+        ))}
+      </section>
+
+      <section className={styles.services} id="services">
+        <div className={styles.sectionHeading}>
+          <div>
+            <p className={styles.sectionKicker}>01</p>
+            <h2>A full-stack partner for modern brands</h2>
+          </div>
+          <Link href="/contact">All services →</Link>
+        </div>
+
+        <div className={styles.serviceList}>
+          {siteContent.services.map((service) => (
+            <article className={styles.serviceRow} key={service.id}>
+              <span>{service.id}</span>
+              <h3>{service.title}</h3>
+              <p>{service.description}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className={styles.portfolio} id="portfolio">
+        <div className={styles.sectionHeading}>
+          <div>
+            <p className={styles.sectionKicker}>SELECTED WORK</p>
+            <h2>Brands I&apos;ve scaled</h2>
+          </div>
+        </div>
+
+        <div className={styles.portfolioGrid}>
+          {siteContent.portfolio.map((item) => {
+            const mediaClass = styles[item.media];
+
+            return (
+              <article className={styles.portfolioCard} key={item.title}>
+                <div className={`${styles.media} ${mediaClass}`}>
+                  <div className={styles.mediaMark} />
+                </div>
+                <div className={styles.cardMeta}>
+                  <div>
+                    <h3>{item.title}</h3>
+                    <p>{item.category}</p>
+                  </div>
+                  <span>{item.metric}</span>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+
+        <Link className={styles.inlineButton} href="/portfolio">
+          See full portfolio →
+        </Link>
+      </section>
+
+      <section className={styles.testimonials} id="experience">
+        <div className={styles.sectionHeadingDark}>
+          <h2>Words from founders</h2>
+        </div>
+
+        <div className={styles.testimonialGrid}>
+          {siteContent.testimonials.map((item) => (
+            <article className={styles.testimonialCard} key={item.name}>
+              <p>“{item.quote}”</p>
+              <div>
+                <strong>{item.name}</strong>
+                <span>{item.role}</span>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className={styles.cta} id="contact">
+        <p>Let&apos;s build something that</p>
+        <h2>
+          actually <em>scales.</em>
+        </h2>
+        <a href="mailto:hello@mehrozgfx.com">Start a conversation ↗</a>
+      </section>
+
+      <footer className={styles.footer}>
+        <div>
+          <Link className={styles.footerBrand} href="/">
+            {siteContent.brandName}
+          </Link>
           <p>
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Learning
-            </a>{" "}
-            center.
+            E-commerce Expert & Creative Strategist.
+            <br />
+            Helping brands scale through strategy, design, and e-commerce.
           </p>
         </div>
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className={styles.secondary}
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        <div>
+          <h3>Navigate</h3>
+          <Link href="/">Home</Link>
+          <Link href="/about">About</Link>
+          <Link href="/services">Services</Link>
+          <Link href="/case-studies">Case Studies</Link>
+          <Link href="/contact">Contact</Link>
         </div>
-      </main>
-    </div>
+
+        <div>
+          <h3>More</h3>
+          <Link href="/portfolio">Portfolio</Link>
+          <Link href="/experience">Experience</Link>
+        </div>
+
+        <div>
+          <h3>Get in touch</h3>
+          <a href={`mailto:${siteContent.contactEmail}`}>{siteContent.contactEmail}</a>
+          <span>{siteContent.locationLine}</span>
+        </div>
+      </footer>
+    </main>
   );
 }

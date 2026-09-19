@@ -1,0 +1,126 @@
+.page {
+  width: min(100%, 1380px);
+  margin: 0 auto;
+  padding: 20px 24px 48px;
+}
+
+/* ── Hero ── */
+.hero {
+  padding: 56px 0 48px;
+}
+
+.kicker {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  margin-bottom: 18px;
+  padding: 7px 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: rgba(251, 248, 244, 0.72);
+  color: var(--accent);
+  font-size: 0.74rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.hero h1 {
+  max-width: 16ch;
+  font-family: var(--font-display), serif;
+  font-size: clamp(3.2rem, 5.5vw, 5.8rem);
+  font-weight: 500;
+  letter-spacing: -0.05em;
+  line-height: 0.93;
+}
+
+.intro {
+  max-width: 44ch;
+  margin-top: 16px;
+  color: var(--foreground-soft);
+  font-size: 1rem;
+  line-height: 1.65;
+}
+
+/* ── Contact grid ── */
+.contactGrid {
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr);
+  gap: 56px;
+  padding-bottom: 56px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* ── Info sidebar ── */
+.contactInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  padding-top: 4px;
+}
+
+.infoGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.infoLabel {
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  color: var(--accent);
+  text-transform: uppercase;
+}
+
+.infoValue {
+  font-family: var(--font-display), serif;
+  font-size: clamp(1.2rem, 1.6vw, 1.6rem);
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  line-height: 1.2;
+  color: var(--foreground);
+  transition: opacity 160ms ease;
+}
+
+a.infoValue:hover {
+  opacity: 0.7;
+}
+
+/* ── Form wrapper ── */
+.formWrapper {
+  padding-top: 0;
+}
+
+/* ── Responsive ── */
+@media (max-width: 860px) {
+  .contactGrid {
+    grid-template-columns: 1fr;
+    gap: 36px;
+  }
+
+  .contactInfo {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 24px 40px;
+  }
+}
+
+@media (max-width: 720px) {
+  .page {
+    padding-inline: 16px;
+    padding-bottom: 28px;
+  }
+
+  .hero {
+    padding-top: 28px;
+    padding-bottom: 32px;
+  }
+
+  .hero h1 {
+    max-width: 100%;
+    font-size: clamp(2.8rem, 14vw, 4.2rem);
+  }
+
+  .contactInfo {
+    flex-direction: column;
+  }
+}
