@@ -9,9 +9,10 @@ import {
   initialAdminContent,
   type AdminContent,
   type AdminProject,
+  type AdminTestimonial,
 } from "@/lib/admin-data";
 
-type AdminView = "overview" | "portfolio" | "profile" | "services" | "inquiries" | "analytics" | "settings";
+type AdminView = "overview" | "portfolio" | "profile" | "reviews" | "services" | "inquiries" | "analytics" | "settings";
 
 type BarStyle = CSSProperties & { "--bar-height": string };
 
@@ -19,6 +20,7 @@ const navigation: { id: AdminView; label: string; icon: string }[] = [
   { id: "overview", label: "Overview", icon: "↗" },
   { id: "portfolio", label: "Portfolio", icon: "▦" },
   { id: "profile", label: "Profile", icon: "◎" },
+  { id: "reviews", label: "Reviews", icon: "❝" },
   { id: "services", label: "Services", icon: "◈" },
   { id: "inquiries", label: "Inquiries", icon: "✉" },
   { id: "analytics", label: "Analytics", icon: "⌁" },
@@ -35,6 +37,15 @@ const emptyProject: AdminProject = {
   status: "Draft",
   featured: false,
   updatedAt: "Just now",
+};
+
+const emptyTestimonial: AdminTestimonial = {
+  id: "",
+  name: "",
+  role: "",
+  quote: "",
+  imageUrl: "",
+  sortOrder: 0,
 };
 
 export default function AdminShell() {
@@ -59,10 +70,98 @@ export default function AdminShell() {
 
   async function persist(nextContent: AdminContent, message = "Saved to PostgreSQL") {
     setContent(nextContent);
-    const payload = { services: nextContent.services, settings: nextContent.settings };
+    const {
+      siteTitle,
+      siteDescription,
+      contactEmail,
+      maintenanceMode,
+      analyticsEnabled,
+      contactTitle,
+      contactIntro,
+      contactResponseTime,
+      contactLocation,
+      aboutIntro,
+      aboutDetail,
+      aboutProof,
+      servicesIntro,
+      portfolioIntro,
+      caseStudiesIntro,
+      experienceIntro,
+    } = nextContent.settings;
+    const payload = {
+      services: nextContent.services,
+      testimonials: nextContent.testimonials,
+      settings: {
+        siteTitle,
+        siteDescription,
+        contactEmail,
+        maintenanceMode,
+        analyticsEnabled,
+        contactTitle,
+        contactIntro,
+        contactResponseTime,
+        contactLocation,
+        aboutIntro,
+        aboutDetail,
+        aboutProof,
+        servicesIntro,
+        portfolioIntro,
+        caseStudiesIntro,
+        experienceIntro,
+      },
+    };
     const response = await fetch("/api/admin/content", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
     if (!response.ok) throw new Error("Could not save content to PostgreSQL.");
     setNotice(message);
+  }
+
+  function updateTestimonial(index: number, field: keyof AdminTestimonial, value: string) {
+    setContent((current) => ({
+      ...current,
+      testimonials: current.testimonials.map((testimonial, testimonialIndex) => testimonialIndex === index ? { ...testimonial, [field]: field === "sortOrder" ? Number(value) : value } : testimonial),
+    }));
+  }
+
+  function addTestimonial() {
+    setContent((current) => ({ ...current, testimonials: [...current.testimonials, { ...emptyTestimonial, id: crypto.randomUUID(), sortOrder: current.testimonials.length }] }));
+  }
+
+  function removeTestimonial(index: number) {
+    setContent((current) => ({ ...current, testimonials: current.testimonials.filter((_, testimonialIndex) => testimonialIndex !== index).map((testimonial, sortOrder) => ({ ...testimonial, sortOrder })) }));
+  }
+
+  function uploadTestimonialImage(index: number, file: File | undefined) {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const image = new window.Image();
+      image.onload = () => {
+        const maxDimension = 800;
+        const scale = Math.min(1, maxDimension / Math.max(image.naturalWidth, image.naturalHeight));
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
+        canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
+        const context = canvas.getContext("2d");
+        if (!context) return;
+        context.drawImage(image, 0, 0, canvas.width, canvas.height);
+        canvas.toBlob((blob) => {
+          if (!blob) return;
+          const compressedReader = new FileReader();
+          compressedReader.onload = () => updateTestimonial(index, "imageUrl", String(compressedReader.result));
+          compressedReader.readAsDataURL(blob);
+        }, "image/jpeg", 0.82);
+      };
+      image.src = String(reader.result);
+    };
+    reader.readAsDataURL(file);
+  }
+
+  async function saveTestimonials() {
+    try {
+      await persist(content, "Reviews saved to PostgreSQL");
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : "Could not save reviews to PostgreSQL.");
+    }
   }
 
   async function updateProfile(field: keyof AdminContent["profile"], value: string) {
@@ -106,7 +205,26 @@ export default function AdminShell() {
   function uploadProfileImage(file: File | undefined) {
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = () => updateProfile("imageUrl", String(reader.result));
+    reader.onload = () => {
+      const image = new window.Image();
+      image.onload = () => {
+        const maxDimension = 1600;
+        const scale = Math.min(1, maxDimension / Math.max(image.naturalWidth, image.naturalHeight));
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
+        canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
+        const context = canvas.getContext("2d");
+        if (!context) return;
+        context.drawImage(image, 0, 0, canvas.width, canvas.height);
+        canvas.toBlob((blob) => {
+          if (!blob) return;
+          const compressedReader = new FileReader();
+          compressedReader.onload = () => updateProfile("imageUrl", String(compressedReader.result));
+          compressedReader.readAsDataURL(blob);
+        }, "image/jpeg", 0.82);
+      };
+      image.src = String(reader.result);
+    };
     reader.readAsDataURL(file);
   }
 
@@ -179,6 +297,7 @@ export default function AdminShell() {
         {activeView === "overview" && <Overview content={content} onNavigate={setActiveView} />}
         {activeView === "portfolio" && <Portfolio content={content} editingProject={editingProject} setEditingProject={setEditingProject} onSave={saveProject} onDelete={deleteProject} />}
         {activeView === "profile" && <Profile content={content} updateProfile={updateProfile} saveProfile={saveProfile} uploadProfileImage={uploadProfileImage} />}
+        {activeView === "reviews" && <Reviews content={content} onAdd={addTestimonial} onRemove={removeTestimonial} onChange={updateTestimonial} onUploadImage={uploadTestimonialImage} onSave={saveTestimonials} />}
         {activeView === "services" && <Services content={content} persist={persist} />}
         {activeView === "inquiries" && <Inquiries content={content} onToggle={toggleInquiry} />}
         {activeView === "analytics" && <Analytics content={content} />}
@@ -191,6 +310,7 @@ export default function AdminShell() {
 function LoginPanel() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -204,7 +324,7 @@ function LoginPanel() {
     setLoading(false);
   }
 
-  return <main className={styles.loginPage}><form className={styles.loginCard} onSubmit={login}><span className={styles.adminMark}>MEHROZ / ADMIN</span><h1>Welcome back.</h1><p>Sign in to manage your portfolio.</p><label>Email<input type="email" required value={email} onChange={(event) => setEmail(event.target.value)} /></label><label>Password<input type="password" required value={password} onChange={(event) => setPassword(event.target.value)} /></label>{error && <p className={styles.loginError} role="alert">{error}</p>}<button className={styles.primaryButton} type="submit" disabled={loading}>{loading ? "Signing in..." : "Sign in"}</button><Link href="/">Back to portfolio</Link></form></main>;
+  return <main className={styles.loginPage}><form className={styles.loginCard} onSubmit={login}><span className={styles.adminMark}>MEHROZ / ADMIN</span><h1>Welcome back.</h1><p>Sign in to manage your portfolio.</p><label>Email<input type="email" required value={email} onChange={(event) => setEmail(event.target.value)} /></label><label>Password<span className={styles.passwordField}><input type={showPassword ? "text" : "password"} required value={password} onChange={(event) => setPassword(event.target.value)} /><button className={styles.passwordToggle} type="button" aria-label={showPassword ? "Hide password" : "Show password"} aria-pressed={showPassword} onClick={() => setShowPassword((visible) => !visible)}>{showPassword ? "◉" : "◌"}</button></span></label>{error && <p className={styles.loginError} role="alert">{error}</p>}<button className={styles.primaryButton} type="submit" disabled={loading}>{loading ? "Signing in..." : "Sign in"}</button><Link href="/">Back to portfolio</Link></form></main>;
 }
 
 function Overview({ content, onNavigate }: { content: AdminContent; onNavigate: (view: AdminView) => void }) {
@@ -248,6 +368,10 @@ function Portfolio({ content, editingProject, setEditingProject, onSave, onDelet
 
 function Profile({ content, updateProfile, saveProfile, uploadProfileImage }: { content: AdminContent; updateProfile: (field: keyof AdminContent["profile"], value: string) => void; saveProfile: () => void; uploadProfileImage: (file: File | undefined) => void }) {
   return <div className={styles.contentArea}><section className={styles.sectionIntro}><div><p className={styles.panelKicker}>IDENTITY</p><h2>Profile settings</h2><p>Update the person visitors meet on the public site.</p></div><button className={styles.primaryButton} type="button" onClick={saveProfile}>Save profile</button></section><section className={styles.editorPanel}><div className={styles.profilePreview}><div className={styles.avatarLarge}>{content.profile.imageUrl ? <Image src={content.profile.imageUrl} alt="Profile preview" width={170} height={170} unoptimized /> : <span>{content.profile.name.slice(0, 1)}</span>}</div><label className={styles.uploadButton}>Change picture<input type="file" accept="image/*" onChange={(event) => uploadProfileImage(event.target.files?.[0])} /></label><small>Images will use storage after database setup.</small></div><div className={styles.formGrid}><label>Name<input value={content.profile.name} onChange={(event) => updateProfile("name", event.target.value)} /></label><label>Role<input value={content.profile.role} onChange={(event) => updateProfile("role", event.target.value)} /></label><label className={styles.fullField}>Bio<textarea rows={4} value={content.profile.bio} onChange={(event) => updateProfile("bio", event.target.value)} /></label><label>Email<input type="email" value={content.profile.email} onChange={(event) => updateProfile("email", event.target.value)} /></label><label>Location<input value={content.profile.location} onChange={(event) => updateProfile("location", event.target.value)} /></label></div></section></div>;
+}
+
+function Reviews({ content, onAdd, onRemove, onChange, onUploadImage, onSave }: { content: AdminContent; onAdd: () => void; onRemove: (index: number) => void; onChange: (index: number, field: keyof AdminTestimonial, value: string) => void; onUploadImage: (index: number, file: File | undefined) => void; onSave: () => void }) {
+  return <div className={styles.contentArea}><section className={styles.sectionIntro}><div><p className={styles.panelKicker}>SOCIAL PROOF</p><h2>Customer reviews</h2><p>Manage the moving review cards shown on the homepage.</p></div><div className={styles.topbarActions}><button className={styles.secondaryButton} type="button" onClick={onAdd}>Add review <span>+</span></button><button className={styles.primaryButton} type="button" onClick={onSave}>Save reviews</button></div></section><div className={styles.reviewEditorList}>{content.testimonials.map((testimonial, index) => <article className={styles.reviewEditorCard} key={testimonial.id}><div className={styles.reviewEditorHeader}><div className={styles.avatarSmall}>{testimonial.imageUrl ? <Image src={testimonial.imageUrl} alt="Review customer preview" width={64} height={64} unoptimized /> : <span>{testimonial.name.slice(0, 1) || "?"}</span>}</div><label className={styles.uploadButton}>Change image<input type="file" accept="image/*" onChange={(event) => onUploadImage(index, event.target.files?.[0])} /></label><button className={styles.rowAction} type="button" onClick={() => onRemove(index)}>Remove</button></div><div className={styles.formGrid}><label>Name<input value={testimonial.name} onChange={(event) => onChange(index, "name", event.target.value)} /></label><label>Designation<input value={testimonial.role} onChange={(event) => onChange(index, "role", event.target.value)} /></label><label className={styles.fullField}>Review<textarea rows={4} value={testimonial.quote} onChange={(event) => onChange(index, "quote", event.target.value)} /></label></div></article>)}</div></div>;
 }
 
 function Services({ content, persist }: { content: AdminContent; persist: (content: AdminContent, message?: string) => void }) {

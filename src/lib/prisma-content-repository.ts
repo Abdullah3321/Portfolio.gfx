@@ -1,19 +1,21 @@
 import { Prisma } from "@prisma/client";
 import { prisma } from "./prisma";
-import type { AdminProfile, AdminProject, AdminService } from "./admin-data";
+import type { AdminProfile, AdminProject, AdminService, AdminTestimonial } from "./admin-data";
 
 const profileSelect = { name: true, role: true, bio: true, email: true, location: true, imageUrl: true } as const;
 const projectSelect = { id: true, title: true, category: true, metric: true, description: true, media: true, status: true, featured: true, updatedAt: true } as const;
+const testimonialSelect = { id: true, name: true, role: true, quote: true, imageUrl: true, sortOrder: true } as const;
 
 function projectResult(project: Prisma.ProjectGetPayload<{ select: typeof projectSelect }>): AdminProject {
   return { ...project, id: project.id, media: project.media as AdminProject["media"], status: project.status as AdminProject["status"], updatedAt: project.updatedAt.toISOString() };
 }
 
 export async function getAdminContent() {
-  const [profile, projects, services, inquiries, settings, resume, analytics, topPages] = await Promise.all([
+  const [profile, projects, services, testimonials, inquiries, settings, resume, analytics, topPages] = await Promise.all([
     prisma.profile.findFirst({ orderBy: { updatedAt: "desc" }, select: profileSelect }),
     prisma.project.findMany({ orderBy: [{ featured: "desc" }, { sortOrder: "asc" }, { createdAt: "desc" }], select: projectSelect }),
     prisma.service.findMany({ orderBy: [{ sortOrder: "asc" }, { updatedAt: "desc" }] }),
+    prisma.testimonial.findMany({ orderBy: [{ sortOrder: "asc" }, { updatedAt: "desc" }], select: testimonialSelect }),
     prisma.inquiry.findMany({ orderBy: { createdAt: "desc" }, take: 50, select: { id: true, name: true, company: true, email: true, subject: true, status: true, createdAt: true } }),
     prisma.siteSettings.findUnique({ where: { id: true } }),
     prisma.resume.findUnique({ where: { id: true }, select: { fileName: true, fileSize: true, updatedAt: true } }),
@@ -25,6 +27,7 @@ export async function getAdminContent() {
     profile,
     projects: projects.map(projectResult),
     services: services.map((service) => ({ id: service.id, title: service.title, description: service.description, visible: service.visible })),
+    testimonials,
     inquiries: inquiries.map((inquiry) => ({ id: inquiry.id, name: inquiry.name, company: inquiry.company, email: inquiry.email, subject: inquiry.subject, status: inquiry.status as "New" | "Read" | "Archived", receivedAt: inquiry.createdAt.toISOString() })),
     settings,
     resume: resume ? { fileName: resume.fileName, fileSize: resume.fileSize, updatedAt: resume.updatedAt.toISOString() } : null,
@@ -73,6 +76,16 @@ export async function saveServices(services: AdminService[]) {
       await transaction.service.upsert({ where: { id: service.id }, create: { id: service.id, title: service.title, description: service.description, visible: service.visible, sortOrder }, update: { title: service.title, description: service.description, visible: service.visible, sortOrder } });
     }
     return services;
+  });
+}
+
+export async function saveTestimonials(testimonials: AdminTestimonial[]) {
+  return prisma.$transaction(async (transaction) => {
+    await transaction.testimonial.deleteMany();
+    await transaction.testimonial.createMany({
+      data: testimonials.map(({ name, role, quote, imageUrl, sortOrder }) => ({ name, role, quote, imageUrl, sortOrder })),
+    });
+    return transaction.testimonial.findMany({ orderBy: { sortOrder: "asc" }, select: testimonialSelect });
   });
 }
 

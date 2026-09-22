@@ -1,8 +1,12 @@
 import Link from "next/link";
+import Image from "next/image";
 import styles from "./page.module.css";
 import { siteContent } from "@/content/site-content";
+import { getPublicContent } from "@/lib/public-content";
 
-export default function Home() {
+export default async function Home() {
+  const { profile, testimonials } = await getPublicContent();
+  const profileImage = profile?.imageUrl || "/profile-portrait.jpg";
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "Person",
@@ -65,17 +69,32 @@ export default function Home() {
           </div>
         </div>
 
-        <div className={styles.heroVisual} aria-hidden="true">
-          <div className={styles.heroMonogram}>D</div>
-          <div className={styles.portraitFrame}>
-            <div className={styles.portraitBackdrop} />
-            <div className={styles.portraitHair} />
-            <div className={styles.portraitFace} />
-            <div className={styles.portraitNeck} />
-            <div className={styles.portraitJacket} />
-            <div className={styles.portraitShirt} />
-            <div className={styles.portraitShadow} />
-          </div>
+        <div className={styles.heroVisual}>
+          {profileImage ? (
+            <div className={styles.profileImageFrame}>
+              <Image
+                className={styles.profileImage}
+                src={profileImage}
+                alt={profile?.name ? `${profile.name} portrait` : "Profile portrait"}
+                fill
+                sizes="(max-width: 800px) 100vw, 45vw"
+                unoptimized
+              />
+            </div>
+          ) : (
+            <>
+              <div className={styles.heroMonogram}>D</div>
+              <div className={styles.portraitFrame} aria-hidden="true">
+                <div className={styles.portraitBackdrop} />
+                <div className={styles.portraitHair} />
+                <div className={styles.portraitFace} />
+                <div className={styles.portraitNeck} />
+                <div className={styles.portraitJacket} />
+                <div className={styles.portraitShirt} />
+                <div className={styles.portraitShadow} />
+              </div>
+            </>
+          )}
           <div className={styles.heroBadge}>BASED IN DUBAI — WORLDWIDE</div>
         </div>
       </section>
@@ -156,16 +175,27 @@ export default function Home() {
           <h2>Words from founders</h2>
         </div>
 
-        <div className={styles.testimonialGrid}>
-          {siteContent.testimonials.map((item) => (
-            <article className={styles.testimonialCard} key={item.name}>
-              <p>“{item.quote}”</p>
-              <div>
-                <strong>{item.name}</strong>
-                <span>{item.role}</span>
-              </div>
-            </article>
-          ))}
+        <div className={styles.testimonialViewport}>
+          <div className={styles.testimonialTrack}>
+            {[...testimonials, ...testimonials].map((item, index) => (
+              <article className={styles.testimonialCard} key={`${item.id}-${index}`}>
+                <div className={styles.testimonialHeader}>
+                  <div className={styles.testimonialAvatar}>
+                    {item.imageUrl ? (
+                      <Image src={item.imageUrl} alt={`${item.name} profile`} fill sizes="64px" unoptimized />
+                    ) : (
+                      item.name.slice(0, 1)
+                    )}
+                  </div>
+                  <div>
+                    <strong>{item.name}</strong>
+                    <span>{item.role}</span>
+                  </div>
+                </div>
+                <p>“{item.quote}”</p>
+              </article>
+            ))}
+          </div>
         </div>
       </section>
 

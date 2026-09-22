@@ -21,16 +21,18 @@ export async function getPublicContent() {
     caseStudiesIntro: siteContent.caseStudiesPage.intro,
     experienceIntro: siteContent.experiencePage.intro,
   };
-  if (!databaseConfigured) return { profile: null, projects: siteContent.portfolioPage.projects, services: siteContent.services, settings: fallbackSettings };
+  const fallbackTestimonials = siteContent.testimonials.map((testimonial, index) => ({ ...testimonial, id: `fallback-${index}`, imageUrl: "", sortOrder: index }));
+  if (!databaseConfigured) return { profile: null, projects: siteContent.portfolioPage.projects, services: siteContent.services, testimonials: fallbackTestimonials, settings: fallbackSettings };
   try {
     const content = await getAdminContent();
     return {
       profile: content.profile,
       projects: content.projects.filter((project) => project.status === "Published"),
       services: content.services.filter((service) => service.visible),
+      testimonials: content.testimonials,
       settings: content.settings ?? fallbackSettings,
     };
   } catch {
-    return { profile: null, projects: siteContent.portfolioPage.projects, services: siteContent.services, settings: fallbackSettings };
+    return { profile: null, projects: siteContent.portfolioPage.projects, services: siteContent.services, testimonials: fallbackTestimonials, settings: fallbackSettings };
   }
 }

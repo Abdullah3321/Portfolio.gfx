@@ -57,7 +57,7 @@
   position: relative;
   aspect-ratio: 0.82;
   overflow: hidden;
-  background: linear-gradient(180deg, #e9e6e2 0%, #cfcac4 100%);
+  background: linear-gradient(180deg, #e8f1fc 0%, #79a9e6 100%);
 }
 
 .media::before,
@@ -96,7 +96,7 @@
 .product {
   background:
     radial-gradient(circle at 68% 72%, rgba(255, 255, 255, 0.18), transparent 14%),
-    linear-gradient(180deg, #111110, #2a2725);
+    linear-gradient(180deg, #0553d0, #06132c);
 }
 
 .product::before {
@@ -109,7 +109,7 @@
 .workspace {
   background:
     linear-gradient(135deg, rgba(0, 0, 0, 0.06), transparent 35%),
-    linear-gradient(180deg, #efede9 0%, #d8d4cf 100%);
+    linear-gradient(180deg, #f4f8fd 0%, #b9d6f8 100%);
 }
 
 .workspace::before {
@@ -122,7 +122,7 @@
 .architecture {
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.12), transparent),
-    repeating-linear-gradient(150deg, #1b1a18 0, #1b1a18 26px, #f2f0ee 26px, #f2f0ee 54px);
+    repeating-linear-gradient(150deg, #06132c 0, #06132c 26px, #b9d6f8 26px, #b9d6f8 54px);
 }
 
 .architecture::before {

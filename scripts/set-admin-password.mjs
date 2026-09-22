@@ -1,7 +1,9 @@
 import { randomBytes, scryptSync } from "node:crypto";
 import { readFile, writeFile } from "node:fs/promises";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
-const envPath = ".env.local";
+const envPath = resolve(dirname(fileURLToPath(import.meta.url)), "..", ".env.local");
 const password = await new Promise((resolve) => {
   const stdin = process.stdin;
   let value = "";

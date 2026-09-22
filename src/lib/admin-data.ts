@@ -17,6 +17,15 @@ export type AdminService = {
   visible: boolean;
 };
 
+export type AdminTestimonial = {
+  id: string;
+  name: string;
+  role: string;
+  quote: string;
+  imageUrl: string;
+  sortOrder: number;
+};
+
 export type AdminProfile = {
   name: string;
   role: string;
@@ -74,6 +83,7 @@ export type AdminContent = {
   profile: AdminProfile;
   projects: AdminProject[];
   services: AdminService[];
+  testimonials: AdminTestimonial[];
   inquiries: AdminInquiry[];
   analytics: AdminAnalytics;
   settings: AdminSettings;
@@ -140,6 +150,11 @@ export const initialAdminContent: AdminContent = {
     { id: "shopify", title: "Shopify Management", description: "Store builds and operations engineered for scale.", visible: true },
     { id: "creative", title: "Creative Direction", description: "Editorial campaigns that keep brands cohesive.", visible: true },
     { id: "cro", title: "Conversion Optimization", description: "Data-led improvements to conversion and lifetime value.", visible: true },
+  ],
+  testimonials: [
+    { id: "sara-idris", name: "Sara Idris", role: "Founder, Brickly", quote: "Mehroz thinks like a founder, not a vendor. He rebuilt our store, our brand, and our numbers - all at once.", imageUrl: "", sortOrder: 0 },
+    { id: "omar-farooq", name: "Omar Farooq", role: "CEO, Dental Factor", quote: "The clarity he brought to our strategy paid for itself in the first month. Genuinely rare talent.", imageUrl: "", sortOrder: 1 },
+    { id: "lina-rahman", name: "Lina Rahman", role: "Creative Lead, Rastak", quote: "Every deliverable felt premium. Our brand finally looks like the category leader we want to be.", imageUrl: "", sortOrder: 2 },
   ],
   inquiries: [],
   analytics: {

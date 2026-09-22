@@ -46,6 +46,18 @@ model Service {
   @@map("services")
 }
 
+model Testimonial {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name      String
+  role      String
+  quote     String
+  imageUrl  String   @default("") @map("image_url")
+  sortOrder Int      @default(0) @map("sort_order")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+  @@index([sortOrder])
+  @@map("testimonials")
+}
+
 model Inquiry {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name      String

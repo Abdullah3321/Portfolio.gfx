@@ -21,6 +21,15 @@ export const profileSchema = z.object({
   imageUrl: z.string().max(2_000_000).refine((value) => !value || value.startsWith("data:image/"), "Profile image must be an image data URL."),
 }).strict();
 
+export const testimonialSchema = z.object({
+  id: z.string().min(1).max(120),
+  name: z.string().trim().min(1).max(120),
+  role: z.string().trim().min(1).max(180),
+  quote: z.string().trim().min(1).max(2000),
+  imageUrl: z.string().max(1_500_000).refine((value) => !value || value.startsWith("data:image/"), "Testimonial image must be an image data URL."),
+  sortOrder: z.number().int().min(0),
+}).strict();
+
 export const serviceSchema = z.object({
   id: z.string().uuid(),
   title: z.string().trim().min(1).max(160),
@@ -49,5 +58,6 @@ export const settingsSchema = z.object({
 
 export const adminContentPatchSchema = z.object({
   services: z.array(serviceSchema).max(100).optional(),
+  testimonials: z.array(testimonialSchema).max(30).optional(),
   settings: settingsSchema.optional(),
-}).strict().refine((value) => value.services !== undefined || value.settings !== undefined, "At least one content section is required.");
+}).strict().refine((value) => value.services !== undefined || value.testimonials !== undefined || value.settings !== undefined, "At least one content section is required.");
