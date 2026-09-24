@@ -320,7 +320,15 @@ function LoginPanel() {
     setError("");
     const response = await fetch("/api/admin/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email, password }) });
     if (response.ok) window.location.reload();
-    else setError("Invalid admin credentials.");
+    else {
+      const result = await response.json().catch(() => null) as { error?: string } | null;
+      const messages: Record<string, string> = {
+        "username-invalid": "Username is Invalid",
+        "password-invalid": "The password is invalid",
+        "both-invalid": "Both are invalid",
+      };
+      setError(messages[result?.error ?? ""] ?? "Unable to sign in.");
+    }
     setLoading(false);
   }
 
@@ -396,5 +404,10 @@ function PageCopyPanel({ content, persist }: { content: AdminContent; persist: (
 }
 
 function Settings({ content, persist }: { content: AdminContent; persist: (content: AdminContent, message?: string) => void }) {
-  return <div className={styles.contentArea}><section className={styles.sectionIntro}><div><p className={styles.panelKicker}>CONFIGURATION</p><h2>Site settings</h2><p>Search, contact, publishing, and analytics controls.</p></div><span className={styles.savedMark}>Saved locally ✓</span></section><section className={styles.settingsPanel}><label>Site title<input value={content.settings.siteTitle} onChange={(event) => persist({ ...content, settings: { ...content.settings, siteTitle: event.target.value } })} /></label><label>Site description<textarea rows={4} value={content.settings.siteDescription} onChange={(event) => persist({ ...content, settings: { ...content.settings, siteDescription: event.target.value } })} /></label><label>Contact email<input type="email" value={content.settings.contactEmail} onChange={(event) => persist({ ...content, settings: { ...content.settings, contactEmail: event.target.value } })} /></label><div className={styles.settingToggle}><div><strong>Analytics collection</strong><span>Allow the future analytics adapter to record anonymous visits.</span></div><label className={styles.switch}><input type="checkbox" checked={content.settings.analyticsEnabled} onChange={(event) => persist({ ...content, settings: { ...content.settings, analyticsEnabled: event.target.checked } })} /><span /></label></div><div className={styles.settingToggle}><div><strong>Maintenance mode</strong><span>Hide public content while a release is in progress.</span></div><label className={styles.switch}><input type="checkbox" checked={content.settings.maintenanceMode} onChange={(event) => persist({ ...content, settings: { ...content.settings, maintenanceMode: event.target.checked } })} /><span /></label></div></section><section className={styles.databasePanel}><p className={styles.panelKicker}>FUTURE CONNECTION</p><h2>Ready for PostgreSQL or MySQL</h2><p>The admin UI is already separated from persistence. Add API routes and replace the browser storage adapter with a server-side repository using your preferred SQL driver.</p><div className={styles.databaseTags}><span>Content tables</span><span>Media storage</span><span>Admin auth</span><span>Analytics events</span></div></section></div>;
+  async function logout() {
+    const response = await fetch("/api/admin/logout", { method: "POST" });
+    if (response.ok) window.location.reload();
+  }
+
+  return <div className={styles.contentArea}><section className={styles.sectionIntro}><div><p className={styles.panelKicker}>CONFIGURATION</p><h2>Site settings</h2><p>Search, contact, publishing, and analytics controls.</p></div><span className={styles.savedMark}>Saved locally ✓</span></section><section className={styles.settingsPanel}><label>Site title<input value={content.settings.siteTitle} onChange={(event) => persist({ ...content, settings: { ...content.settings, siteTitle: event.target.value } })} /></label><label>Site description<textarea rows={4} value={content.settings.siteDescription} onChange={(event) => persist({ ...content, settings: { ...content.settings, siteDescription: event.target.value } })} /></label><label>Contact email<input type="email" value={content.settings.contactEmail} onChange={(event) => persist({ ...content, settings: { ...content.settings, contactEmail: event.target.value } })} /></label><div className={styles.settingToggle}><div><strong>Analytics collection</strong><span>Allow the future analytics adapter to record anonymous visits.</span></div><label className={styles.switch}><input type="checkbox" checked={content.settings.analyticsEnabled} onChange={(event) => persist({ ...content, settings: { ...content.settings, analyticsEnabled: event.target.checked } })} /><span /></label></div><div className={styles.settingToggle}><div><strong>Maintenance mode</strong><span>Hide public content while a release is in progress.</span></div><label className={styles.switch}><input type="checkbox" checked={content.settings.maintenanceMode} onChange={(event) => persist({ ...content, settings: { ...content.settings, maintenanceMode: event.target.checked } })} /><span /></label></div></section><section className={styles.databasePanel}><p className={styles.panelKicker}>FUTURE CONNECTION</p><h2>Ready for PostgreSQL or MySQL</h2><p>The admin UI is already separated from persistence. Add API routes and replace the browser storage adapter with a server-side repository using your preferred SQL driver.</p><div className={styles.databaseTags}><span>Content tables</span><span>Media storage</span><span>Admin auth</span><span>Analytics events</span></div><button type="button" className={styles.secondaryButton} onClick={logout}>Log out</button></section></div>;
 }

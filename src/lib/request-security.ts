@@ -6,7 +6,11 @@ export function requestFromSameOrigin(request: Request) {
   const origin = request.headers.get("origin");
   if (!origin) return process.env.NODE_ENV !== "production";
   try {
-    return new URL(origin).origin === new URL(request.url).origin;
+    const requestUrl = new URL(request.url);
+    const forwardedProtocol = request.headers.get("x-forwarded-proto")?.split(",")[0]?.trim();
+    const forwardedHost = request.headers.get("x-forwarded-host")?.split(",")[0]?.trim();
+    const requestOrigin = new URL(`${forwardedProtocol || requestUrl.protocol.replace(":", "")}://${forwardedHost || request.headers.get("host") || requestUrl.host}`);
+    return new URL(origin).origin === requestOrigin.origin;
   } catch {
     return false;
   }
