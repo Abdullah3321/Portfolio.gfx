@@ -21,10 +21,10 @@ export const siteContent = {
     "VAKT",
   ],
   metrics: [
-    { value: "7+", label: "Years in E-commerce" },
-    { value: "40+", label: "Brands Scaled" },
-    { value: "3.2x", label: "Avg. Revenue Lift" },
-    { value: "$18M+", label: "Store Revenue Managed" },
+    { value: "5+", label: "Years in E-commerce" },
+    { value: "10+", label: "Brands Scaled" },
+    { value: "5x", label: "Avg. Revenue Lift" },
+    { value: "Rs. 3M+", label: "Store Revenue Managed" },
   ],
   services: [
     {
