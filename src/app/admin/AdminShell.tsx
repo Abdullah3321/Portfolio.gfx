@@ -52,7 +52,7 @@ export default function AdminShell() {
   const [content, setContent] = useState<AdminContent>(initialAdminContent);
   const [activeView, setActiveView] = useState<AdminView>("overview");
   const [editingProject, setEditingProject] = useState<AdminProject | null>(null);
-  const [notice, setNotice] = useState("Demo mode: changes are saved in this browser only.");
+  const [notice, setNotice] = useState("");
   const [authRequired, setAuthRequired] = useState(false);
 
   useEffect(() => {
@@ -60,7 +60,7 @@ export default function AdminShell() {
       .then(async (response) => {
         if (!response.ok) {
           if (response.status === 401) setAuthRequired(true);
-          throw new Error(response.status === 401 ? "Sign in required before using PostgreSQL persistence." : "Database content could not be loaded.");
+          throw new Error(response.status === 401 ? "Sign in required." : "Content could not be loaded.");
         }
         return response.json() as Promise<Partial<AdminContent>>;
       })
@@ -68,7 +68,7 @@ export default function AdminShell() {
       .catch((error: Error) => setNotice(error.message));
   }, []);
 
-  async function persist(nextContent: AdminContent, message = "Saved to PostgreSQL") {
+  async function persist(nextContent: AdminContent, message = "Saved") {
     setContent(nextContent);
     const {
       siteTitle,
@@ -111,7 +111,7 @@ export default function AdminShell() {
       },
     };
     const response = await fetch("/api/admin/content", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
-    if (!response.ok) throw new Error("Could not save content to PostgreSQL.");
+    if (!response.ok) throw new Error("Could not save content.");
     setNotice(message);
   }
 
@@ -158,9 +158,9 @@ export default function AdminShell() {
 
   async function saveTestimonials() {
     try {
-      await persist(content, "Reviews saved to PostgreSQL");
+      await persist(content, "Reviews saved");
     } catch (error) {
-      setNotice(error instanceof Error ? error.message : "Could not save reviews to PostgreSQL.");
+      setNotice(error instanceof Error ? error.message : "Could not save reviews.");
     }
   }
 
@@ -168,13 +168,13 @@ export default function AdminShell() {
     const profile = { ...content.profile, [field]: value };
     setContent((current) => ({ ...current, profile }));
     const response = await fetch("/api/admin/profile", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(profile) });
-    if (!response.ok) setNotice("Could not save profile to PostgreSQL.");
-    else setNotice("Profile saved to PostgreSQL");
+    if (!response.ok) setNotice("Could not save profile.");
+    else setNotice("Profile saved");
   }
 
   async function saveProfile() {
     const response = await fetch("/api/admin/profile", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(content.profile) });
-    setNotice(response.ok ? "Profile saved to PostgreSQL" : "Could not save profile to PostgreSQL.");
+    setNotice(response.ok ? "Profile saved" : "Could not save profile.");
   }
 
   function saveProject(event: FormEvent<HTMLFormElement>) {
@@ -182,8 +182,8 @@ export default function AdminShell() {
     if (!editingProject?.title.trim()) return;
     const exists = content.projects.some((project) => project.id === editingProject.id);
     fetch("/api/admin/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(editingProject) })
-      .then(async (response) => { if (!response.ok) throw new Error("Could not save project to PostgreSQL."); return response.json() as Promise<AdminProject>; })
-      .then((savedProject) => { setContent((current) => ({ ...current, projects: exists ? current.projects.map((project) => project.id === editingProject.id ? savedProject : project) : [...current.projects, savedProject] })); setNotice("Project saved to PostgreSQL"); })
+      .then(async (response) => { if (!response.ok) throw new Error("Could not save project."); return response.json() as Promise<AdminProject>; })
+      .then((savedProject) => { setContent((current) => ({ ...current, projects: exists ? current.projects.map((project) => project.id === editingProject.id ? savedProject : project) : [...current.projects, savedProject] })); setNotice("Project saved"); })
       .catch((error: Error) => setNotice(error.message));
     setEditingProject(null);
   }
@@ -191,14 +191,14 @@ export default function AdminShell() {
   function deleteProject(projectId: string) {
     if (!window.confirm("Remove this project from the demo portfolio?")) return;
     fetch(`/api/admin/projects?id=${encodeURIComponent(projectId)}`, { method: "DELETE" })
-      .then((response) => { if (!response.ok) throw new Error("Could not remove project from PostgreSQL."); setContent((current) => ({ ...current, projects: current.projects.filter((project) => project.id !== projectId) })); setNotice("Project removed from PostgreSQL"); })
+      .then((response) => { if (!response.ok) throw new Error("Could not remove project."); setContent((current) => ({ ...current, projects: current.projects.filter((project) => project.id !== projectId) })); setNotice("Project removed"); })
       .catch((error: Error) => setNotice(error.message));
   }
 
   function toggleInquiry(inquiryId: string) {
     fetch(`/api/admin/inquiries/${encodeURIComponent(inquiryId)}`, { method: "PATCH" })
       .then(async (response) => { if (!response.ok) throw new Error("Could not update inquiry."); return response.json(); })
-      .then((updatedInquiry) => { setContent((current) => ({ ...current, inquiries: current.inquiries.map((inquiry) => inquiry.id === inquiryId ? updatedInquiry : inquiry) })); setNotice("Inquiry updated in PostgreSQL"); })
+      .then((updatedInquiry) => { setContent((current) => ({ ...current, inquiries: current.inquiries.map((inquiry) => inquiry.id === inquiryId ? updatedInquiry : inquiry) })); setNotice("Inquiry updated"); })
       .catch((error: Error) => setNotice(error.message));
   }
 
@@ -240,7 +240,7 @@ export default function AdminShell() {
     }
     const resume = await response.json();
     setContent((current) => ({ ...current, resume }));
-    setNotice("Resume uploaded to PostgreSQL");
+    setNotice("Resume uploaded");
   }
 
   const activeLabel = navigation.find((item) => item.id === activeView)?.label;
@@ -290,9 +290,7 @@ export default function AdminShell() {
           </div>
         </header>
 
-        <div className={styles.notice} role="status">
-          <span>i</span>{notice}<button type="button" onClick={() => setNotice("Database adapter placeholder: connect this store to PostgreSQL or MySQL before deployment.")}>Database plan</button>
-        </div>
+          {notice && <div className={styles.notice} role="status"><span>i</span>{notice}</div>}
 
         {activeView === "overview" && <Overview content={content} onNavigate={setActiveView} />}
         {activeView === "portfolio" && <Portfolio content={content} editingProject={editingProject} setEditingProject={setEditingProject} onSave={saveProject} onDelete={deleteProject} />}
