@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
+import type { CSSProperties } from "react";
 import { Cormorant_Garamond, Manrope } from "next/font/google";
 import "./globals.css";
+import { getPublicContent } from "@/lib/public-content";
+import WhatsAppButton from "./WhatsAppButton";
 
 const manrope = Manrope({
   variable: "--font-body",
@@ -42,18 +45,30 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export const dynamic = "force-dynamic";
+
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const { settings } = await getPublicContent();
+  const themeStyle = {
+    "--background": settings.backgroundColor,
+    "--foreground": settings.textColor,
+    "--accent": settings.accentColor,
+  } as CSSProperties;
+
   return (
     <html
       lang="en"
       data-scroll-behavior="smooth"
       className={`${manrope.variable} ${cormorant.variable}`}
     >
-      <body>{children}</body>
+      <body style={themeStyle}>
+        {children}
+        <WhatsAppButton phoneNumber={settings.whatsappNumber} />
+      </body>
     </html>
   );
 }

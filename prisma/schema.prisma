@@ -27,6 +27,7 @@ model Project {
   metric      String   @default("")
   description String   @default("")
   media       String   @default("product")
+  imageUrl    String   @default("") @map("image_url")
   status      String   @default("Draft")
   featured    Boolean  @default(false)
   sortOrder   Int      @default(0) @map("sort_order")
@@ -89,6 +90,10 @@ model SiteSettings {
   portfolioIntro String @default("A selection of brands scaled through strategy, design and e-commerce.") @map("portfolio_intro")
   caseStudiesIntro String @default("A closer look at the strategy, execution and outcomes behind selected engagements.") @map("case_studies_intro")
   experienceIntro String @default("Seven years of experience scaling D2C brands across agencies, studios and direct founder partnerships.") @map("experience_intro")
+  backgroundColor String @default("#f4f8fd") @map("background_color")
+  textColor String @default("#06132c") @map("text_color")
+  accentColor String @default("#fdc716") @map("accent_color")
+  whatsappNumber String @default("923408144424") @map("whatsapp_number")
   updatedAt        DateTime @default(now()) @updatedAt @map("updated_at")
   @@map("site_settings")
 }

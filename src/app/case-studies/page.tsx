@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import styles from "./page.module.css";
 import base from "../page.module.css";
 import { siteContent } from "@/content/site-content";
@@ -12,7 +13,7 @@ export const metadata: Metadata = {
 };
 
 export default async function CaseStudiesPage() {
-  const { settings } = await getPublicContent();
+  const { settings, projects } = await getPublicContent();
   return (
     <main className={styles.page} id="top">
       <header className={base.header}>
@@ -43,11 +44,13 @@ export default async function CaseStudiesPage() {
 
       <section className={styles.list} aria-label="Case studies">
         {siteContent.caseStudiesPage.cases.map((item) => {
+          const project = projects.find((candidate) => candidate.title === item.title);
           const mediaClass = styles[item.media];
 
           return (
             <article className={styles.caseRow} key={item.title}>
-              <div className={`${styles.visual} ${mediaClass}`} aria-hidden="true">
+              <div className={`${styles.visual} ${mediaClass}`}>
+                {project?.imageUrl && <Image className={styles.projectImage} src={project.imageUrl} alt={`${item.title} project`} fill sizes="(max-width: 800px) 100vw, 42vw" unoptimized />}
                 <span className={styles.metric}>{item.metric}</span>
               </div>
 

@@ -20,9 +20,13 @@ export async function getPublicContent() {
     portfolioIntro: siteContent.portfolioPage.intro,
     caseStudiesIntro: siteContent.caseStudiesPage.intro,
     experienceIntro: siteContent.experiencePage.intro,
+    backgroundColor: "#f4f8fd",
+    textColor: "#06132c",
+    accentColor: "#fdc716",
+    whatsappNumber: "923408144424",
   };
   const fallbackTestimonials = siteContent.testimonials.map((testimonial, index) => ({ ...testimonial, id: `fallback-${index}`, imageUrl: "", sortOrder: index }));
-  if (!databaseConfigured) return { profile: null, projects: siteContent.portfolioPage.projects, services: siteContent.services, testimonials: fallbackTestimonials, settings: fallbackSettings };
+  if (!databaseConfigured) return { profile: null, projects: siteContent.portfolioPage.projects.map((project) => ({ ...project, imageUrl: "" })), services: siteContent.services, testimonials: fallbackTestimonials, settings: fallbackSettings };
   try {
     const content = await getAdminContent();
     return {
@@ -33,6 +37,6 @@ export async function getPublicContent() {
       settings: content.settings ?? fallbackSettings,
     };
   } catch {
-    return { profile: null, projects: siteContent.portfolioPage.projects, services: siteContent.services, testimonials: fallbackTestimonials, settings: fallbackSettings };
+    return { profile: null, projects: siteContent.portfolioPage.projects.map((project) => ({ ...project, imageUrl: "" })), services: siteContent.services, testimonials: fallbackTestimonials, settings: fallbackSettings };
   }
 }

@@ -54,6 +54,7 @@
 
 .visual {
   position: relative;
+  position: relative;
   min-height: 220px;
   overflow: hidden;
   background: linear-gradient(180deg, #e8f1fc 0%, #79a9e6 100%);
@@ -223,3 +224,5 @@
     padding: 18px 0 22px;
   }
 }
+
+.projectImage { object-fit: cover; }

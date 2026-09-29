@@ -7,6 +7,7 @@ export const projectInputSchema = z.object({
   metric: z.string().trim().min(1).max(160),
   description: z.string().trim().max(2000),
   media: z.enum(["product", "workspace", "architecture"]),
+  imageUrl: z.string().max(2_000_000).refine((value) => !value || value.startsWith("data:image/"), "Project image must be an image data URL."),
   status: z.enum(["Published", "Draft"]),
   featured: z.boolean(),
   updatedAt: z.string().optional().default("Just now"),
@@ -54,6 +55,10 @@ export const settingsSchema = z.object({
   portfolioIntro: z.string().trim().min(1).max(2000),
   caseStudiesIntro: z.string().trim().min(1).max(2000),
   experienceIntro: z.string().trim().min(1).max(2000),
+  backgroundColor: z.string().regex(/^#[0-9a-f]{6}$/i),
+  textColor: z.string().regex(/^#[0-9a-f]{6}$/i),
+  accentColor: z.string().regex(/^#[0-9a-f]{6}$/i),
+  whatsappNumber: z.string().regex(/^\d{8,15}$/),
 }).strict();
 
 export const adminContentPatchSchema = z.object({

@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS projects (
   metric TEXT NOT NULL DEFAULT '',
   description TEXT NOT NULL DEFAULT '',
   media TEXT NOT NULL DEFAULT 'product' CHECK (media IN ('product', 'workspace', 'architecture')),
+  image_url TEXT NOT NULL DEFAULT '',
   status TEXT NOT NULL DEFAULT 'Draft' CHECK (status IN ('Published', 'Draft')),
   featured BOOLEAN NOT NULL DEFAULT FALSE,
   sort_order INTEGER NOT NULL DEFAULT 0,
@@ -57,6 +58,10 @@ CREATE TABLE IF NOT EXISTS site_settings (
   contact_email TEXT NOT NULL,
   maintenance_mode BOOLEAN NOT NULL DEFAULT FALSE,
   analytics_enabled BOOLEAN NOT NULL DEFAULT TRUE,
+  background_color TEXT NOT NULL DEFAULT '#f4f8fd',
+  text_color TEXT NOT NULL DEFAULT '#06132c',
+  accent_color TEXT NOT NULL DEFAULT '#fdc716',
+  whatsapp_number TEXT NOT NULL DEFAULT '923408144424',
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 

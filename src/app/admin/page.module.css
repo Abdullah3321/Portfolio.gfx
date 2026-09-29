@@ -107,6 +107,7 @@
 .recentItem { display: grid; grid-template-columns: 42px minmax(0, 1fr) auto auto; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--admin-line); }
 .recentItem:last-child { border-bottom: 0; }
 .projectThumb { display: block; width: 42px; height: 42px; background: #d5ccc1; }
+.projectThumbImage { width: 42px; height: 42px; border-radius: 4px; object-fit: cover; }
 .projectThumb.product { background: linear-gradient(145deg, #1f1d1b, #b87744); }
 .projectThumb.workspace { background: linear-gradient(145deg, #eee7dd, #8d8175); }
 .projectThumb.architecture { background: repeating-linear-gradient(145deg, #24211f 0 9px, #c9bdb0 9px 18px); }

@@ -55,6 +55,7 @@
 
 .media {
   position: relative;
+  position: relative;
   aspect-ratio: 0.82;
   overflow: hidden;
   background: linear-gradient(180deg, #e8f1fc 0%, #79a9e6 100%);
@@ -188,3 +189,5 @@
     gap: 26px;
   }
 }
+
+.projectImage { object-fit: cover; }

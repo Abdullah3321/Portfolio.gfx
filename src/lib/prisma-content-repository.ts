@@ -3,7 +3,7 @@ import { prisma } from "./prisma";
 import type { AdminProfile, AdminProject, AdminService, AdminTestimonial } from "./admin-data";
 
 const profileSelect = { name: true, role: true, bio: true, email: true, location: true, imageUrl: true } as const;
-const projectSelect = { id: true, title: true, category: true, metric: true, description: true, media: true, status: true, featured: true, updatedAt: true } as const;
+const projectSelect = { id: true, title: true, category: true, metric: true, description: true, media: true, imageUrl: true, status: true, featured: true, updatedAt: true } as const;
 const testimonialSelect = { id: true, name: true, role: true, quote: true, imageUrl: true, sortOrder: true } as const;
 
 function projectResult(project: Prisma.ProjectGetPayload<{ select: typeof projectSelect }>): AdminProject {
@@ -57,7 +57,7 @@ export async function saveProfile(profile: AdminProfile) {
 
 export async function saveProject(project: AdminProject) {
   const slug = project.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "project";
-  const data = { title: project.title, category: project.category, metric: project.metric, description: project.description, media: project.media, status: project.status, featured: project.featured };
+  const data = { title: project.title, category: project.category, metric: project.metric, description: project.description, media: project.media, imageUrl: project.imageUrl, status: project.status, featured: project.featured };
   const existing = project.id ? await prisma.project.findUnique({ where: { id: project.id }, select: { id: true } }) : null;
   const saved = existing
     ? await prisma.project.update({ where: { id: existing.id }, data, select: projectSelect })
@@ -89,7 +89,7 @@ export async function saveTestimonials(testimonials: AdminTestimonial[]) {
   });
 }
 
-export async function saveSettings(settings: { siteTitle: string; siteDescription: string; contactEmail: string; maintenanceMode: boolean; analyticsEnabled: boolean }) {
+export async function saveSettings(settings: { siteTitle: string; siteDescription: string; contactEmail: string; maintenanceMode: boolean; analyticsEnabled: boolean; contactTitle: string; contactIntro: string; contactResponseTime: string; contactLocation: string; aboutIntro: string; aboutDetail: string; aboutProof: string; servicesIntro: string; portfolioIntro: string; caseStudiesIntro: string; experienceIntro: string; backgroundColor: string; textColor: string; accentColor: string; whatsappNumber: string }) {
   return prisma.siteSettings.update({ where: { id: true }, data: settings });
 }
 

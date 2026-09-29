@@ -5,6 +5,7 @@ export type AdminProject = {
   metric: string;
   description: string;
   media: "product" | "workspace" | "architecture";
+  imageUrl: string;
   status: "Published" | "Draft";
   featured: boolean;
   updatedAt: string;
@@ -71,6 +72,10 @@ export type AdminSettings = {
   portfolioIntro: string;
   caseStudiesIntro: string;
   experienceIntro: string;
+  backgroundColor: string;
+  textColor: string;
+  accentColor: string;
+  whatsappNumber: string;
 };
 
 export type AdminResume = {
@@ -107,6 +112,7 @@ export const initialAdminContent: AdminContent = {
       metric: "+214% revenue in 6 months",
       description: "Premium modular furniture storefront and growth strategy.",
       media: "product",
+      imageUrl: "",
       status: "Published",
       featured: true,
       updatedAt: "Today",
@@ -118,6 +124,7 @@ export const initialAdminContent: AdminContent = {
       metric: "2.9x return on ad spend",
       description: "Catalog restructuring and product detail experience for profitable scale.",
       media: "workspace",
+      imageUrl: "",
       status: "Published",
       featured: true,
       updatedAt: "Yesterday",
@@ -129,6 +136,7 @@ export const initialAdminContent: AdminContent = {
       metric: "+88% conversion rate",
       description: "Editorial brand refresh and conversion optimization program.",
       media: "architecture",
+      imageUrl: "",
       status: "Published",
       featured: false,
       updatedAt: "12 Aug 2026",
@@ -140,6 +148,7 @@ export const initialAdminContent: AdminContent = {
       metric: "3.4x AOV growth",
       description: "Bundle strategy, subscriptions, and a repeat-purchase content engine.",
       media: "product",
+      imageUrl: "",
       status: "Draft",
       featured: false,
       updatedAt: "08 Aug 2026",
@@ -182,6 +191,10 @@ export const initialAdminContent: AdminContent = {
     portfolioIntro: "A selection of brands scaled through strategy, design and e-commerce.",
     caseStudiesIntro: "A closer look at the strategy, execution and outcomes behind selected engagements.",
     experienceIntro: "Seven years of experience scaling D2C brands across agencies, studios and direct founder partnerships.",
+    backgroundColor: "#f4f8fd",
+    textColor: "#06132c",
+    accentColor: "#fdc716",
+    whatsappNumber: "923408144424",
   },
   resume: null,
 };

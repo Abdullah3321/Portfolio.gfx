@@ -34,6 +34,7 @@ const emptyProject: AdminProject = {
   metric: "",
   description: "",
   media: "product",
+  imageUrl: "",
   status: "Draft",
   featured: false,
   updatedAt: "Just now",
@@ -87,6 +88,10 @@ export default function AdminShell() {
       portfolioIntro,
       caseStudiesIntro,
       experienceIntro,
+      backgroundColor,
+      textColor,
+      accentColor,
+      whatsappNumber,
     } = nextContent.settings;
     const payload = {
       services: nextContent.services,
@@ -108,6 +113,10 @@ export default function AdminShell() {
         portfolioIntro,
         caseStudiesIntro,
         experienceIntro,
+        backgroundColor,
+        textColor,
+        accentColor,
+        whatsappNumber,
       },
     };
     const response = await fetch("/api/admin/content", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
@@ -228,6 +237,32 @@ export default function AdminShell() {
     reader.readAsDataURL(file);
   }
 
+  function uploadProjectImage(file: File | undefined) {
+    if (!file || !editingProject) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const image = new window.Image();
+      image.onload = () => {
+        const maxDimension = 1600;
+        const scale = Math.min(1, maxDimension / Math.max(image.naturalWidth, image.naturalHeight));
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
+        canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
+        const context = canvas.getContext("2d");
+        if (!context) return;
+        context.drawImage(image, 0, 0, canvas.width, canvas.height);
+        canvas.toBlob((blob) => {
+          if (!blob) return;
+          const compressedReader = new FileReader();
+          compressedReader.onload = () => setEditingProject({ ...editingProject, imageUrl: String(compressedReader.result) });
+          compressedReader.readAsDataURL(blob);
+        }, "image/jpeg", 0.82);
+      };
+      image.src = String(reader.result);
+    };
+    reader.readAsDataURL(file);
+  }
+
   async function uploadResume(file: File | undefined) {
     if (!file) return;
     const formData = new FormData();
@@ -293,13 +328,13 @@ export default function AdminShell() {
           {notice && <div className={styles.notice} role="status"><span>i</span>{notice}</div>}
 
         {activeView === "overview" && <Overview content={content} onNavigate={setActiveView} />}
-        {activeView === "portfolio" && <Portfolio content={content} editingProject={editingProject} setEditingProject={setEditingProject} onSave={saveProject} onDelete={deleteProject} />}
+        {activeView === "portfolio" && <Portfolio content={content} editingProject={editingProject} setEditingProject={setEditingProject} onSave={saveProject} onDelete={deleteProject} uploadProjectImage={uploadProjectImage} />}
         {activeView === "profile" && <Profile content={content} updateProfile={updateProfile} saveProfile={saveProfile} uploadProfileImage={uploadProfileImage} />}
         {activeView === "reviews" && <Reviews content={content} onAdd={addTestimonial} onRemove={removeTestimonial} onChange={updateTestimonial} onUploadImage={uploadTestimonialImage} onSave={saveTestimonials} />}
         {activeView === "services" && <Services content={content} persist={persist} />}
         {activeView === "inquiries" && <Inquiries content={content} onToggle={toggleInquiry} />}
         {activeView === "analytics" && <Analytics content={content} />}
-        {activeView === "settings" && <><Settings content={content} persist={persist} /><PageCopyPanel content={content} persist={persist} /><ResumePanel resume={content.resume} uploadResume={uploadResume} /></>}
+        {activeView === "settings" && <><Settings content={content} persist={persist} /><VisualSettings content={content} persist={persist} /><PageCopyPanel content={content} persist={persist} /><ResumePanel resume={content.resume} uploadResume={uploadResume} /></>}
       </main>
     </div>
   );
@@ -368,8 +403,8 @@ function Overview({ content, onNavigate }: { content: AdminContent; onNavigate: 
   );
 }
 
-function Portfolio({ content, editingProject, setEditingProject, onSave, onDelete }: { content: AdminContent; editingProject: AdminProject | null; setEditingProject: (project: AdminProject | null) => void; onSave: (event: FormEvent<HTMLFormElement>) => void; onDelete: (id: string) => void }) {
-  return <div className={styles.contentArea}><section className={styles.sectionIntro}><div><p className={styles.panelKicker}>PUBLIC WORK</p><h2>Portfolio projects</h2><p>These projects are ready to become database records later.</p></div><button className={styles.primaryButton} type="button" onClick={() => setEditingProject({ ...emptyProject })}>Add project <span>+</span></button></section><section className={styles.projectTable}><div className={styles.tableHeader}><span>Project</span><span>Category</span><span>Result</span><span>Status</span><span>Actions</span></div>{content.projects.map((project) => <div className={styles.tableRow} key={project.id}><div className={styles.projectCell}><span className={`${styles.projectThumb} ${styles[project.media]}`} /><div><strong>{project.title}</strong><small>{project.featured ? "Featured project" : "Standard project"}</small></div></div><span>{project.category}</span><strong>{project.metric}</strong><span><em className={project.status === "Published" ? styles.statusPublished : styles.statusDraft}>{project.status}</em></span><div className={styles.rowActions}><button type="button" onClick={() => setEditingProject({ ...project })}>Edit</button><button type="button" onClick={() => onDelete(project.id)}>Remove</button></div></div>)}</section>{editingProject && <div className={styles.modalBackdrop} role="presentation"><form className={styles.modal} onSubmit={onSave}><div className={styles.modalHeader}><div><p className={styles.panelKicker}>{editingProject.id ? "EDIT PROJECT" : "NEW PROJECT"}</p><h2>{editingProject.id ? editingProject.title : "Add a project"}</h2></div><button type="button" className={styles.closeButton} onClick={() => setEditingProject(null)} aria-label="Close">×</button></div><div className={styles.formGrid}><label>Project title<input required value={editingProject.title} onChange={(event) => setEditingProject({ ...editingProject, title: event.target.value })} /></label><label>Category<input required value={editingProject.category} onChange={(event) => setEditingProject({ ...editingProject, category: event.target.value })} /></label><label>Result metric<input required value={editingProject.metric} onChange={(event) => setEditingProject({ ...editingProject, metric: event.target.value })} /></label><label>Visual style<select value={editingProject.media} onChange={(event) => setEditingProject({ ...editingProject, media: event.target.value as AdminProject["media"] })}><option value="product">Product</option><option value="workspace">Workspace</option><option value="architecture">Architecture</option></select></label><label className={styles.fullField}>Description<textarea rows={4} value={editingProject.description} onChange={(event) => setEditingProject({ ...editingProject, description: event.target.value })} /></label><label className={styles.checkField}><input type="checkbox" checked={editingProject.featured} onChange={(event) => setEditingProject({ ...editingProject, featured: event.target.checked })} /> Featured on homepage</label><label>Status<select value={editingProject.status} onChange={(event) => setEditingProject({ ...editingProject, status: event.target.value as AdminProject["status"] })}><option>Published</option><option>Draft</option></select></label></div><div className={styles.modalFooter}><button type="button" className={styles.secondaryButton} onClick={() => setEditingProject(null)}>Cancel</button><button className={styles.primaryButton} type="submit">Save project</button></div></form></div>}</div>;
+function Portfolio({ content, editingProject, setEditingProject, onSave, onDelete, uploadProjectImage }: { content: AdminContent; editingProject: AdminProject | null; setEditingProject: (project: AdminProject | null) => void; onSave: (event: FormEvent<HTMLFormElement>) => void; onDelete: (id: string) => void; uploadProjectImage: (file: File | undefined) => void }) {
+  return <div className={styles.contentArea}><section className={styles.sectionIntro}><div><p className={styles.panelKicker}>PUBLIC WORK</p><h2>Portfolio projects</h2><p>These projects are ready to become database records later.</p></div><button className={styles.primaryButton} type="button" onClick={() => setEditingProject({ ...emptyProject })}>Add project <span>+</span></button></section><section className={styles.projectTable}><div className={styles.tableHeader}><span>Project</span><span>Category</span><span>Result</span><span>Status</span><span>Actions</span></div>{content.projects.map((project) => <div className={styles.tableRow} key={project.id}><div className={styles.projectCell}>{project.imageUrl ? <Image className={styles.projectThumbImage} src={project.imageUrl} alt="" width={52} height={52} unoptimized /> : <span className={`${styles.projectThumb} ${styles[project.media]}`} />}<div><strong>{project.title}</strong><small>{project.featured ? "Featured project" : "Standard project"}</small></div></div><span>{project.category}</span><strong>{project.metric}</strong><span><em className={project.status === "Published" ? styles.statusPublished : styles.statusDraft}>{project.status}</em></span><div className={styles.rowActions}><button type="button" onClick={() => setEditingProject({ ...project })}>Edit</button><button type="button" onClick={() => onDelete(project.id)}>Remove</button></div></div>)}</section>{editingProject && <div className={styles.modalBackdrop} role="presentation"><form className={styles.modal} onSubmit={onSave}><div className={styles.modalHeader}><div><p className={styles.panelKicker}>{editingProject.id ? "EDIT PROJECT" : "NEW PROJECT"}</p><h2>{editingProject.id ? editingProject.title : "Add a project"}</h2></div><button type="button" className={styles.closeButton} onClick={() => setEditingProject(null)} aria-label="Close">×</button></div><div className={styles.formGrid}>{editingProject.imageUrl && <div className={styles.fullField}><Image src={editingProject.imageUrl} alt="Project preview" width={160} height={100} unoptimized /></div>}<label className={styles.uploadButton}>Project picture<input type="file" accept="image/*" onChange={(event) => uploadProjectImage(event.target.files?.[0])} /></label><label>Project title<input required value={editingProject.title} onChange={(event) => setEditingProject({ ...editingProject, title: event.target.value })} /></label><label>Category<input required value={editingProject.category} onChange={(event) => setEditingProject({ ...editingProject, category: event.target.value })} /></label><label>Result metric<input required value={editingProject.metric} onChange={(event) => setEditingProject({ ...editingProject, metric: event.target.value })} /></label><label>Visual style<select value={editingProject.media} onChange={(event) => setEditingProject({ ...editingProject, media: event.target.value as AdminProject["media"] })}><option value="product">Product</option><option value="workspace">Workspace</option><option value="architecture">Architecture</option></select></label><label className={styles.fullField}>Description<textarea rows={4} value={editingProject.description} onChange={(event) => setEditingProject({ ...editingProject, description: event.target.value })} /></label><label className={styles.checkField}><input type="checkbox" checked={editingProject.featured} onChange={(event) => setEditingProject({ ...editingProject, featured: event.target.checked })} /> Featured on homepage</label><label>Status<select value={editingProject.status} onChange={(event) => setEditingProject({ ...editingProject, status: event.target.value as AdminProject["status"] })}><option>Published</option><option>Draft</option></select></label></div><div className={styles.modalFooter}><button type="button" className={styles.secondaryButton} onClick={() => setEditingProject(null)}>Cancel</button><button className={styles.primaryButton} type="submit">Save project</button></div></form></div>}</div>;
 }
 
 function Profile({ content, updateProfile, saveProfile, uploadProfileImage }: { content: AdminContent; updateProfile: (field: keyof AdminContent["profile"], value: string) => void; saveProfile: () => void; uploadProfileImage: (file: File | undefined) => void }) {
@@ -399,6 +434,11 @@ function ResumePanel({ resume, uploadResume }: { resume: AdminContent["resume"];
 function PageCopyPanel({ content, persist }: { content: AdminContent; persist: (content: AdminContent, message?: string) => void }) {
   const update = (field: keyof AdminContent["settings"], value: string) => persist({ ...content, settings: { ...content.settings, [field]: value } }, "Page copy saved to PostgreSQL");
   return <section className={styles.databasePanel}><p className={styles.panelKicker}>PUBLIC PAGE COPY</p><h2>Contact and page descriptions</h2><div className={styles.settingsPanel}><label>Contact page title<input value={content.settings.contactTitle} onChange={(event) => update("contactTitle", event.target.value)} /></label><label>Contact page description<textarea rows={3} value={content.settings.contactIntro} onChange={(event) => update("contactIntro", event.target.value)} /></label><label>Contact response time<input value={content.settings.contactResponseTime} onChange={(event) => update("contactResponseTime", event.target.value)} /></label><label>Contact location<input value={content.settings.contactLocation} onChange={(event) => update("contactLocation", event.target.value)} /></label><label>About page description<textarea rows={3} value={content.settings.aboutIntro} onChange={(event) => update("aboutIntro", event.target.value)} /></label><label>About page detail<textarea rows={3} value={content.settings.aboutDetail} onChange={(event) => update("aboutDetail", event.target.value)} /></label><label>About page proof<textarea rows={3} value={content.settings.aboutProof} onChange={(event) => update("aboutProof", event.target.value)} /></label><label>Services page description<textarea rows={3} value={content.settings.servicesIntro} onChange={(event) => update("servicesIntro", event.target.value)} /></label><label>Portfolio page description<textarea rows={3} value={content.settings.portfolioIntro} onChange={(event) => update("portfolioIntro", event.target.value)} /></label><label>Case studies description<textarea rows={3} value={content.settings.caseStudiesIntro} onChange={(event) => update("caseStudiesIntro", event.target.value)} /></label><label>Experience page description<textarea rows={3} value={content.settings.experienceIntro} onChange={(event) => update("experienceIntro", event.target.value)} /></label></div></section>;
+}
+
+function VisualSettings({ content, persist }: { content: AdminContent; persist: (content: AdminContent, message?: string) => void }) {
+  const update = (field: keyof AdminContent["settings"], value: string) => persist({ ...content, settings: { ...content.settings, [field]: value } }, "Visual settings saved");
+  return <section className={styles.databasePanel}><p className={styles.panelKicker}>VISUALS & CONTACT</p><h2>Website colors and WhatsApp</h2><div className={styles.settingsPanel}><label>Website background color<input type="color" value={content.settings.backgroundColor} onChange={(event) => update("backgroundColor", event.target.value)} /></label><label>Text color<input type="color" value={content.settings.textColor} onChange={(event) => update("textColor", event.target.value)} /></label><label>Accent color<input type="color" value={content.settings.accentColor} onChange={(event) => update("accentColor", event.target.value)} /></label><label>WhatsApp number<input inputMode="numeric" value={content.settings.whatsappNumber} onChange={(event) => update("whatsappNumber", event.target.value.replace(/\D/g, ""))} /></label></div></section>;
 }
 
 function Settings({ content, persist }: { content: AdminContent; persist: (content: AdminContent, message?: string) => void }) {

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import styles from "./page.module.css";
 import base from "../page.module.css";
 import { siteContent } from "@/content/site-content";
@@ -48,6 +49,7 @@ export default async function PortfolioPage() {
           return (
             <article className={styles.card} key={project.title}>
               <div className={`${styles.media} ${mediaClass}`}>
+                {project.imageUrl && <Image className={styles.projectImage} src={project.imageUrl} alt={`${project.title} project`} fill sizes="(max-width: 800px) 100vw, 33vw" unoptimized />}
                 <span className={styles.metric}>{project.metric}</span>
               </div>
               <h2>{project.title}</h2>
