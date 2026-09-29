@@ -124,6 +124,66 @@ export default function AdminShell() {
     setNotice(message);
   }
 
+  async function persistSettings(settings: AdminContent["settings"], message = "Settings saved") {
+    setContent((current) => ({ ...current, settings }));
+    const {
+      siteTitle,
+      siteDescription,
+      contactEmail,
+      maintenanceMode,
+      analyticsEnabled,
+      contactTitle,
+      contactIntro,
+      contactResponseTime,
+      contactLocation,
+      aboutIntro,
+      aboutDetail,
+      aboutProof,
+      servicesIntro,
+      portfolioIntro,
+      caseStudiesIntro,
+      experienceIntro,
+      backgroundColor,
+      textColor,
+      accentColor,
+      whatsappNumber,
+    } = settings;
+    const response = await fetch("/api/admin/content", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        settings: {
+          siteTitle,
+          siteDescription,
+          contactEmail,
+          maintenanceMode,
+          analyticsEnabled,
+          contactTitle,
+          contactIntro,
+          contactResponseTime,
+          contactLocation,
+          aboutIntro,
+          aboutDetail,
+          aboutProof,
+          servicesIntro,
+          portfolioIntro,
+          caseStudiesIntro,
+          experienceIntro,
+          backgroundColor,
+          textColor,
+          accentColor,
+          whatsappNumber,
+        },
+      }),
+    });
+    if (!response.ok) {
+      const result = await response.json().catch(() => null) as { error?: string } | null;
+      setNotice(result?.error ?? "Could not save settings.");
+      return;
+    }
+    setNotice(message);
+  }
+
   function updateTestimonial(index: number, field: keyof AdminTestimonial, value: string) {
     setContent((current) => ({
       ...current,
@@ -334,7 +394,7 @@ export default function AdminShell() {
         {activeView === "services" && <Services content={content} persist={persist} />}
         {activeView === "inquiries" && <Inquiries content={content} onToggle={toggleInquiry} />}
         {activeView === "analytics" && <Analytics content={content} />}
-        {activeView === "settings" && <><Settings content={content} persist={persist} /><VisualSettings content={content} persist={persist} /><PageCopyPanel content={content} persist={persist} /><ResumePanel resume={content.resume} uploadResume={uploadResume} /></>}
+        {activeView === "settings" && <><Settings content={content} persist={persist} /><VisualSettings content={content} persistSettings={persistSettings} /><PageCopyPanel content={content} persist={persist} /><ResumePanel resume={content.resume} uploadResume={uploadResume} /></>}
       </main>
     </div>
   );
@@ -436,9 +496,10 @@ function PageCopyPanel({ content, persist }: { content: AdminContent; persist: (
   return <section className={styles.databasePanel}><p className={styles.panelKicker}>PUBLIC PAGE COPY</p><h2>Contact and page descriptions</h2><div className={styles.settingsPanel}><label>Contact page title<input value={content.settings.contactTitle} onChange={(event) => update("contactTitle", event.target.value)} /></label><label>Contact page description<textarea rows={3} value={content.settings.contactIntro} onChange={(event) => update("contactIntro", event.target.value)} /></label><label>Contact response time<input value={content.settings.contactResponseTime} onChange={(event) => update("contactResponseTime", event.target.value)} /></label><label>Contact location<input value={content.settings.contactLocation} onChange={(event) => update("contactLocation", event.target.value)} /></label><label>About page description<textarea rows={3} value={content.settings.aboutIntro} onChange={(event) => update("aboutIntro", event.target.value)} /></label><label>About page detail<textarea rows={3} value={content.settings.aboutDetail} onChange={(event) => update("aboutDetail", event.target.value)} /></label><label>About page proof<textarea rows={3} value={content.settings.aboutProof} onChange={(event) => update("aboutProof", event.target.value)} /></label><label>Services page description<textarea rows={3} value={content.settings.servicesIntro} onChange={(event) => update("servicesIntro", event.target.value)} /></label><label>Portfolio page description<textarea rows={3} value={content.settings.portfolioIntro} onChange={(event) => update("portfolioIntro", event.target.value)} /></label><label>Case studies description<textarea rows={3} value={content.settings.caseStudiesIntro} onChange={(event) => update("caseStudiesIntro", event.target.value)} /></label><label>Experience page description<textarea rows={3} value={content.settings.experienceIntro} onChange={(event) => update("experienceIntro", event.target.value)} /></label></div></section>;
 }
 
-function VisualSettings({ content, persist }: { content: AdminContent; persist: (content: AdminContent, message?: string) => void }) {
-  const update = (field: keyof AdminContent["settings"], value: string) => persist({ ...content, settings: { ...content.settings, [field]: value } }, "Visual settings saved");
-  return <section className={styles.databasePanel}><p className={styles.panelKicker}>VISUALS & CONTACT</p><h2>Website colors and WhatsApp</h2><div className={styles.settingsPanel}><label>Website background color<input type="color" value={content.settings.backgroundColor} onChange={(event) => update("backgroundColor", event.target.value)} /></label><label>Text color<input type="color" value={content.settings.textColor} onChange={(event) => update("textColor", event.target.value)} /></label><label>Accent color<input type="color" value={content.settings.accentColor} onChange={(event) => update("accentColor", event.target.value)} /></label><label>WhatsApp number<input inputMode="numeric" value={content.settings.whatsappNumber} onChange={(event) => update("whatsappNumber", event.target.value.replace(/\D/g, ""))} /></label></div></section>;
+function VisualSettings({ content, persistSettings }: { content: AdminContent; persistSettings: (settings: AdminContent["settings"], message?: string) => Promise<void> }) {
+  const update = (field: keyof AdminContent["settings"], value: string) => persistSettings({ ...content.settings, [field]: value }, "Visual settings saved");
+  const resetColors = () => persistSettings({ ...content.settings, backgroundColor: "#f4f8fd", textColor: "#06132c", accentColor: "#fdc716" }, "Default colors restored");
+  return <section className={styles.databasePanel}><p className={styles.panelKicker}>VISUALS & CONTACT</p><h2>Website colors and WhatsApp</h2><div className={styles.settingsPanel}><label>Website background color<input type="color" value={content.settings.backgroundColor} onChange={(event) => update("backgroundColor", event.target.value)} /></label><label>Text color<input type="color" value={content.settings.textColor} onChange={(event) => update("textColor", event.target.value)} /></label><label>Accent color<input type="color" value={content.settings.accentColor} onChange={(event) => update("accentColor", event.target.value)} /></label><label>WhatsApp number<input inputMode="numeric" value={content.settings.whatsappNumber} onChange={(event) => update("whatsappNumber", event.target.value.replace(/\D/g, ""))} /></label><button className={styles.secondaryButton} type="button" onClick={resetColors}>Reset default colors</button></div></section>;
 }
 
 function Settings({ content, persist }: { content: AdminContent; persist: (content: AdminContent, message?: string) => void }) {
